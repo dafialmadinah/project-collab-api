@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Idea;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class IdeaController extends Controller
 {
@@ -21,13 +22,22 @@ class IdeaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|string'
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $idea = Idea::create($validated);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('ideas', 'public');
+        }
+
+        $idea = Idea::create([
+            'user_id' => auth('api')->id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'image' => $imagePath,
+        ]);
 
         return response()->json([
             'message' => 'Idea created successfully',
@@ -40,9 +50,7 @@ class IdeaController extends Controller
         $idea = Idea::with(['user', 'joinRequests'])->find($id);
 
         if (!$idea) {
-            return response()->json([
-                'message' => 'Idea not found'
-            ], 404);
+            return response()->json(['message' => 'Idea not found'], 404);
         }
 
         return response()->json([
@@ -56,18 +64,29 @@ class IdeaController extends Controller
         $idea = Idea::find($id);
 
         if (!$idea) {
-            return response()->json([
-                'message' => 'Idea not found'
-            ], 404);
+            return response()->json(['message' => 'Idea not found'], 404);
+        }
+
+        if ($idea->user_id !== auth('api')->id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
         }
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
-            'image' => 'nullable|string'
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $idea->update($validated);
+        $data = $request->only(['title', 'description']);
+
+        if ($request->hasFile('image')) {
+            if ($idea->image && Storage::disk('public')->exists($idea->image)) {
+                Storage::disk('public')->delete($idea->image);
+            }
+            $data['image'] = $request->file('image')->store('ideas', 'public');
+        }
+
+        $idea->update($data);
 
         return response()->json([
             'message' => 'Idea updated successfully',
@@ -80,9 +99,15 @@ class IdeaController extends Controller
         $idea = Idea::find($id);
 
         if (!$idea) {
-            return response()->json([
-                'message' => 'Idea not found'
-            ], 404);
+            return response()->json(['message' => 'Idea not found'], 404);
+        }
+
+        if ($idea->user_id !== auth('api')->id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        if ($idea->image && Storage::disk('public')->exists($idea->image)) {
+            Storage::disk('public')->delete($idea->image);
         }
 
         $idea->delete();
