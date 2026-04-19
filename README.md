@@ -27,8 +27,8 @@ REST API backend untuk platform kolaborasi ide, dibangun dengan **Laravel** + **
 
 ## Tech Stack
 
-- PHP 8.x
-- Laravel 8/9 (sesuai project kamu)
+- PHP 7.4.33
+- Laravel 8.83.29
 - MySQL / MariaDB
 - `tymon/jwt-auth` untuk token JWT
 - Laravel Storage (public disk) untuk upload gambar
