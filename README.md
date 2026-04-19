@@ -1,64 +1,324 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+## Pembuat
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Project ini dibuat oleh:
 
-## About Laravel
+- **Muhammad Rizqullah Almadinah**
+- **Aditri Surya Nugraha**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+untuk mata kuliah **Pengembangan Aplikasi Web Lanjut – Kelas A**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# Project Collab API
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+REST API backend untuk platform kolaborasi ide, dibangun dengan **Laravel** + **JWT Authentication**.
 
-## Learning Laravel
+## Fitur Utama
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Auth JWT: Register, Login, Get Current User
+- CRUD Ideas
+- Upload gambar untuk Idea
+- CRUD Join Requests
+- Role-based access:
+  - **member**: hanya bisa ubah/hapus idea miliknya
+  - **admin**: bisa ubah/hapus idea siapa pun
+- Validasi request + response JSON
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+- PHP 8.x
+- Laravel 8/9 (sesuai project kamu)
+- MySQL / MariaDB
+- `tymon/jwt-auth` untuk token JWT
+- Laravel Storage (public disk) untuk upload gambar
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## Instalasi
 
-## Contributing
+1. Clone repository
+2. Install dependency
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer install
+```
 
-## Code of Conduct
+3. Copy file environment
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+cp .env.example .env
+```
 
-## Security Vulnerabilities
+> Jika di Windows:
+```bash
+copy .env.example .env
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. Generate app key
+
+```bash
+php artisan key:generate
+```
+
+5. Atur konfigurasi database di `.env`
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=project_collab_api
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+6. Jalankan migration
+
+```bash
+php artisan migrate
+```
+
+7. Install JWT & generate secret (jika belum)
+
+```bash
+composer require tymon/jwt-auth
+php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+php artisan jwt:secret
+```
+
+8. Pastikan guard API pakai JWT di `config/auth.php`
+
+```php
+'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+    'api' => [
+        'driver' => 'jwt',
+        'provider' => 'users',
+    ],
+],
+```
+
+9. Link storage untuk akses gambar
+
+```bash
+php artisan storage:link
+```
+
+10. Jalankan server
+
+```bash
+php artisan serve
+```
+
+Base URL default:
+`http://127.0.0.1:8000/api`
+
+---
+
+## Authentication Flow
+
+1. Register user
+2. Login untuk mendapat `access_token`
+3. Kirim token di header:
+
+```http
+Authorization: Bearer <access_token>
+Accept: application/json
+```
+
+---
+
+## Role
+
+- `member` (default saat register)
+- `admin`
+
+Aturan di Ideas:
+- member hanya bisa update/delete idea miliknya
+- admin bisa update/delete idea siapa pun
+
+---
+
+## Endpoint List
+
+## Auth
+
+### Register
+- **POST** `/api/register`
+- Body (JSON):
+```json
+{
+  "name": "Dafi",
+  "email": "dafi@mail.com",
+  "password": "password123"
+}
+```
+
+### Login
+- **POST** `/api/login`
+- Body (JSON):
+```json
+{
+  "email": "dafi@mail.com",
+  "password": "password123"
+}
+```
+
+### Me
+- **GET** `/api/me`
+- Header: Bearer token (required)
+
+---
+
+## Ideas
+
+> Semua endpoint Ideas butuh Bearer token.
+
+### Get all ideas
+- **GET** `/api/ideas`
+
+### Create idea
+- **POST** `/api/ideas`
+- Body: `form-data`
+  - `title` (text, required)
+  - `description` (text, required)
+  - `image` (file, optional, jpg/jpeg/png, max 2MB)
+
+### Get detail idea
+- **GET** `/api/ideas/{id}`
+
+### Update idea
+- **PUT** `/api/ideas/{id}`
+- Body: `form-data`
+  - `title` (text, optional)
+  - `description` (text, optional)
+  - `image` (file, optional)
+
+### Delete idea
+- **DELETE** `/api/ideas/{id}`
+
+---
+
+## Join Requests
+
+> Semua endpoint Requests butuh Bearer token.
+
+### Get all requests
+- **GET** `/api/requests`
+
+### Create request
+- **POST** `/api/requests`
+- Body (JSON):
+```json
+{
+  "idea_id": 1
+}
+```
+
+### Get detail request
+- **GET** `/api/requests/{id}`
+
+### Update request status
+- **PUT** `/api/requests/{id}`
+- Body (JSON):
+```json
+{
+  "status": "accepted"
+}
+```
+Nilai status yang valid:
+- `pending`
+- `accepted`
+- `rejected`
+
+### Delete request
+- **DELETE** `/api/requests/{id}`
+
+---
+
+## Struktur Relasi Data
+
+- Satu `User` punya banyak `Idea`
+- Satu `User` punya banyak `JoinRequest`
+- Satu `Idea` punya banyak `JoinRequest`
+- `join_requests` menghubungkan user dan idea (dengan status)
+
+---
+
+## Response Code Umum
+
+- `200` OK
+- `201` Created
+- `401` Unauthorized (token tidak ada/invalid)
+- `403` Forbidden (tidak punya hak akses)
+- `404` Not Found
+- `422` Validation Error
+
+---
+
+## Testing Manual (Postman)
+
+Urutan yang disarankan:
+1. Register user member
+2. Login member → simpan token
+3. Register/login admin → simpan token admin
+4. Create idea dengan token member (upload image)
+5. Coba update idea member pakai token admin (harus bisa)
+6. Buat join request ke idea
+7. Uji skenario error:
+   - tanpa token (401)
+   - bukan owner update idea (403)
+   - upload file invalid (422)
+
+---
+
+## Troubleshooting
+
+### Error JWT secret null
+Contoh error:
+`Argument 3 passed to ... Key, null given`
+
+Solusi:
+```bash
+php artisan jwt:secret
+php artisan config:clear
+php artisan cache:clear
+php artisan config:cache
+php artisan serve
+```
+Lalu login ulang untuk token baru.
+
+### Route Not Found
+```bash
+php artisan route:list
+php artisan route:clear
+php artisan optimize:clear
+```
+Pastikan URL memakai prefix `/api`.
+
+---
+
+## Catatan Keamanan
+
+- Password di-hash (`bcrypt/Hash::make`)
+- Jangan expose `.env` ke repository publik
+- Batasi ukuran dan tipe file upload
+- Gunakan HTTPS di production
+
+---
+
+## Pengembangan Lanjutan (Opsional)
+
+- Gunakan Laravel Policy untuk authorization
+- Tambahkan pagination (`paginate()`) di list endpoint
+- Standarisasi response format (resource class)
+- Tambahkan unit/integration test (PHPUnit)
+- Tambahkan refresh token / token blacklist strategy
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Project ini untuk pembelajaran & pengembangan internal.
