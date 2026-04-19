@@ -13,14 +13,15 @@ REST API backend untuk platform kolaborasi ide, dibangun dengan **Laravel** + **
 
 ## Fitur Utama
 
-- Auth JWT: Register, Login, Get Current User
-- CRUD Ideas
-- Upload gambar untuk Idea
-- CRUD Join Requests
-- Role-based access:
-  - **member**: hanya bisa ubah/hapus idea miliknya
-  - **admin**: bisa ubah/hapus idea siapa pun
-- Validasi request + response JSON
+- **Otentikasi dengan JWT (JSON Web Token)**: Register, Login, dan pengecekan pengguna yang sedang login (Get Current User).
+- **Manajemen Ide / Proyek (Ideas)**: Pengguna dapat membuat (beserta upload gambar), melihat, mengubah, dan menghapus ide.
+- **Sistem Kolaborasi (Join Requests)**: 
+  - Pengguna dapat mengirimkan permintaan bergabung (*join request*) ke dalam ide proyek milik orang lain.
+  - Pembuat ide dapat melihat dan mengelola request yang masuk.
+- **Role-Based Access Control (RBAC)**:
+  - **member**: Hanya dapat mengubah atau menghapus ide miliknya sendiri.
+  - **admin**: Memiliki kewenangan penuh untuk mengubah atau menghapus ide milik siapa pun.
+- **Standarisasi API**: Dilengkapi dengan validasi data *request* dan struktur *response* JSON yang konsisten.
 
 ---
 
