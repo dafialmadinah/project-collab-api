@@ -67,7 +67,7 @@ class IdeaController extends Controller
             return response()->json(['message' => 'Idea not found'], 404);
         }
 
-        if ($idea->user_id !== auth('api')->id()) {
+        if (!$this->canModifyIdea($idea)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -83,6 +83,7 @@ class IdeaController extends Controller
             if ($idea->image && Storage::disk('public')->exists($idea->image)) {
                 Storage::disk('public')->delete($idea->image);
             }
+
             $data['image'] = $request->file('image')->store('ideas', 'public');
         }
 
@@ -102,7 +103,7 @@ class IdeaController extends Controller
             return response()->json(['message' => 'Idea not found'], 404);
         }
 
-        if ($idea->user_id !== auth('api')->id()) {
+        if (!$this->canModifyIdea($idea)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -115,5 +116,12 @@ class IdeaController extends Controller
         return response()->json([
             'message' => 'Idea deleted successfully'
         ], 200);
+    }
+
+    private function canModifyIdea(Idea $idea): bool
+    {
+        $user = auth('api')->user();
+
+        return $idea->user_id === $user->id || $user->role === 'admin';
     }
 }

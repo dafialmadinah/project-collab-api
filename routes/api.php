@@ -11,6 +11,5 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::apiResource('ideas', IdeaController::class);
-
     Route::apiResource('requests', JoinRequestController::class);
 });
