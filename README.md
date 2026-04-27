@@ -13,22 +13,21 @@ REST API backend untuk platform kolaborasi ide, dibangun dengan **Laravel** + **
 
 ## Fitur Utama
 
-- **Otentikasi dengan JWT (JSON Web Token)**: Register, Login, dan pengecekan pengguna yang sedang login (Get Current User).
-- **Manajemen Ide / Proyek (Ideas)**: Pengguna dapat membuat (beserta upload gambar), melihat, mengubah, dan menghapus ide.
-- **Sistem Kolaborasi (Join Requests)**: 
-  - Pengguna dapat mengirimkan permintaan bergabung (*join request*) ke dalam ide proyek milik orang lain.
-  - Pembuat ide dapat melihat dan mengelola request yang masuk.
-- **Role-Based Access Control (RBAC)**:
-  - **member**: Hanya dapat mengubah atau menghapus ide miliknya sendiri.
-  - **admin**: Memiliki kewenangan penuh untuk mengubah atau menghapus ide milik siapa pun.
-- **Standarisasi API**: Dilengkapi dengan validasi data *request* dan struktur *response* JSON yang konsisten.
+- Auth JWT: Register, Login, Get Current User
+- CRUD Ideas
+- Upload gambar untuk Idea
+- CRUD Join Requests
+- Role-based access:
+  - **member**: hanya bisa ubah/hapus idea miliknya
+  - **admin**: bisa ubah/hapus idea siapa pun
+- Validasi request + response JSON
 
 ---
 
 ## Tech Stack
 
-- PHP 7.4.33
-- Laravel 8.83.29
+- PHP 8.x
+- Laravel 8/9 (sesuai project kamu)
 - MySQL / MariaDB
 - `tymon/jwt-auth` untuk token JWT
 - Laravel Storage (public disk) untuk upload gambar
@@ -201,3 +200,125 @@ Aturan di Ideas:
 - **DELETE** `/api/ideas/{id}`
 
 ---
+
+## Join Requests
+
+> Semua endpoint Requests butuh Bearer token.
+
+### Get all requests
+- **GET** `/api/requests`
+
+### Create request
+- **POST** `/api/requests`
+- Body (JSON):
+```json
+{
+  "idea_id": 1
+}
+```
+
+### Get detail request
+- **GET** `/api/requests/{id}`
+
+### Update request status
+- **PUT** `/api/requests/{id}`
+- Body (JSON):
+```json
+{
+  "status": "accepted"
+}
+```
+Nilai status yang valid:
+- `pending`
+- `accepted`
+- `rejected`
+
+### Delete request
+- **DELETE** `/api/requests/{id}`
+
+---
+
+## Struktur Relasi Data
+
+- Satu `User` punya banyak `Idea`
+- Satu `User` punya banyak `JoinRequest`
+- Satu `Idea` punya banyak `JoinRequest`
+- `join_requests` menghubungkan user dan idea (dengan status)
+
+---
+
+## Response Code Umum
+
+- `200` OK
+- `201` Created
+- `401` Unauthorized (token tidak ada/invalid)
+- `403` Forbidden (tidak punya hak akses)
+- `404` Not Found
+- `422` Validation Error
+
+---
+
+## Testing Manual (Postman)
+
+Urutan yang disarankan:
+1. Register user member
+2. Login member → simpan token
+3. Register/login admin → simpan token admin
+4. Create idea dengan token member (upload image)
+5. Coba update idea member pakai token admin (harus bisa)
+6. Buat join request ke idea
+7. Uji skenario error:
+   - tanpa token (401)
+   - bukan owner update idea (403)
+   - upload file invalid (422)
+
+---
+
+## Troubleshooting
+
+### Error JWT secret null
+Contoh error:
+`Argument 3 passed to ... Key, null given`
+
+Solusi:
+```bash
+php artisan jwt:secret
+php artisan config:clear
+php artisan cache:clear
+php artisan config:cache
+php artisan serve
+```
+Lalu login ulang untuk token baru.
+
+### Route Not Found
+```bash
+php artisan route:list
+php artisan route:clear
+php artisan optimize:clear
+```
+Pastikan URL memakai prefix `/api`.
+
+---
+
+## Catatan Keamanan
+
+- Password di-hash (`bcrypt/Hash::make`)
+- Jangan expose `.env` ke repository publik
+- Batasi ukuran dan tipe file upload
+- Gunakan HTTPS di production
+
+---
+
+## Pengembangan Lanjutan (Opsional)
+
+- Gunakan Laravel Policy untuk authorization
+- Tambahkan pagination (`paginate()`) di list endpoint
+- Standarisasi response format (resource class)
+- Tambahkan unit/integration test (PHPUnit)
+- Tambahkan refresh token / token blacklist strategy
+
+---
+
+## License
+
+Project ini untuk pembelajaran & pengembangan internal.
